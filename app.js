@@ -6,7 +6,7 @@ var ejs = require('ejs');
 var session = require('express-session');
 
 app.use(session({
-  secret: 'H!@OJ$#ISNC@JRGO$J!@#',  // 쿠키에 저장할 connect.sid값을 암호화할 키값 입력
+  secret: '@#@$MYSIGN#@$#$',  // 쿠키에 저장할 connect.sid값을 암호화할 키값 입력
   resave: false,  //세션 아이디를 접속할때마다 새롭게 발급하지 않음
   saveUninitialized: true,  //세션 아이디를 실제 사용하기전에는 발급하지 않음
 }));
@@ -26,9 +26,7 @@ app.set('views','./views');
 //express에게 ejs를 쓰겠다고 선언
 app.set('view engine','ejs');
 
-
-
-
+conn.connect();
 //로그인요청
 app.get('/', function(req, res){
   res.render('login', {});
@@ -39,7 +37,9 @@ app.post('/login', function(req, res){
   var libraryPw = req.body.libraryPw;
   console.log('libraryId:'+libraryId);
   console.log('libraryPw:'+libraryPw);
-  var sql = 'SELECT library_id as libraryId FROM library WHERE library_id = ? AND library_pw = ?';
+  var sql = `SELECT library_id as libraryId
+            FROM library
+            WHERE library_id = ? AND library_pw = ?`;
   conn.query(sql, [libraryId,libraryPw], function(err, result, fields){
     console.log('result:'+result[0].libraryId);
     if(err){
@@ -48,24 +48,24 @@ app.post('/login', function(req, res){
     } else {
       if(result[0].libraryId){
         console.log('로그인성공');
-        req.session.id=libraryId;
+        req.session.libraryId=libraryId;
         //res.send(req.session.id);
-        console.log('session:'+req.session.id);
+        console.log('session:'+req.session.libraryId);
         res.redirect('/main');
       }
     }
-    conn.end();
   });
 });
 
 //로그아웃
 app.get('/logout', function(req, res){
-  console.log('session:'+req.session.id);
+  console.log('session destroy before:'+req.session.libraryId);
   //세션삭제
-  if(req.session.id){
+  if(req.session.libraryId){
     req.session.destroy(function(err){
       if(err){
         console.log(err);
+        res.status(500).send('Internal Server Error');
       } else {
         res.redirect('/');
       }
@@ -73,9 +73,8 @@ app.get('/logout', function(req, res){
   } else {
     res.redirect('/');
   }
-  console.log('session:'+req.session);
+  console.log('session destroy after:'+req.session);
 });
-
 
 
 //main요청
@@ -83,9 +82,57 @@ app.get('/main', function(req, res){
   res.render('main',{});
 });
 
-//도서추가
+
+//도서등록 폼
 app.get('/bookAdd', function(req, res){
-  res.render('bookAdd',{});
+  var sql = `SELECT
+        			genre_no as genreNo,
+        			genre_name as genreName
+        		FROM genre`;
+  conn.query(sql, function(err, genre, fields){
+    if(err){
+      console.log(err);
+      res.status(500).send('Internal Server Error');
+    } else {
+      res.render('bookAdd',{ genre: genre });
+    }
+  });
+});
+
+//도서등록 실행
+app.post('/bookAdd', function(req,res){
+  var bookName = req.body.bookName;
+  console.log('bookName:'+bookName);
+  var bookAuthor = req.body.bookAuthor;
+  console.log('bookAuthor:'+bookAuthor);
+  var bookPublisher = req.body.bookPublisher;
+  console.log('bookPublisher:'+bookPublisher);
+  var genre = req.body.genre;
+  console.log('genre:'+genre);
+  var libraryId = req.session.libraryId;
+  console.log('libraryId:'+libraryId);
+  var sql = `INSERT INTO book(
+         			library_id,
+         			genre_no,
+         			book_name,
+         			book_author,
+         			book_publisher
+         		) values (
+         			?,?,?,?,?
+         		)`;
+  conn.query(sql, [libraryId, genre, bookName, bookAuthor, bookPublisher], function(err, result, fiedls){
+    if(err){
+      console.log(err);
+      res.status(500).send('Internal Server Error');
+    } else {
+      if(result){
+        console.log('도서등록 성공');
+        res.redirect('/bookAdd');
+      } else {
+        res.redirect('도서등록에 실패했습니다.');
+      }
+    }
+  });
 });
 
 //도서폐기

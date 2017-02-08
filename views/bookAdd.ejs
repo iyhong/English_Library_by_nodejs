@@ -115,9 +115,11 @@ a { /*사이드 글자 색상*/
 						장르 :
 						<select name="genre">
 							<option value="">::선택::</option>
-							<c:forEach var="g" items="${genreList}">
-								<option value="${g.genreNo}">${g.genreName}</option>
-							</c:forEach>
+							<%	for(var g in genre) {	%>
+								<option value="<%= genre[g].genreNo %>"><%= genre[g].genreName %></option>
+							<%}%>
+
+
 						</select>
 					</div>
 					<p>
