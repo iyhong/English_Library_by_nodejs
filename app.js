@@ -120,25 +120,63 @@ app.post('/bookAdd', function(req,res){
          		) values (
          			?,?,?,?,?
          		)`;
-  conn.query(sql, [libraryId, genre, bookName, bookAuthor, bookPublisher], function(err, result, fiedls){
+  if(!libraryId){
+    res.render('fail',{message:'로그인이 안되어있습니다.'});
+  } else {
+    conn.query(sql, [libraryId, genre, bookName, bookAuthor, bookPublisher], function(err, result, fiedls){
+      if(err){
+        console.log(err);
+        res.status(500).send('Internal Server Error');
+      } else {
+        if(result){
+          console.log('도서등록 성공');
+          res.redirect('/bookAdd');
+        } else {
+          res.redirect('도서등록에 실패했습니다.');
+        }
+      }
+    });
+  }
+});
+
+//도서폐기 폼
+app.get('/bookDisposal', function(req, res){
+  res.render('bookDisposal',{});
+});
+
+//도서폐기 실행
+app.post('/bookDisposal', function(req, res){
+  var bookCode = req.body.bookCode;
+  var sql = `SELECT
+        			state_no as stateNo
+         		FROM book
+         		WHERE book_code=?`;
+  conn.query(sql, [bookCode], function(err, result){
     if(err){
       console.log(err);
       res.status(500).send('Internal Server Error');
     } else {
-      if(result){
-        console.log('도서등록 성공');
-        res.redirect('/bookAdd');
+      if(result[0].stateNo===3){
+        res.render('fail',{message:'이미 폐기된 도서입니다.'});
+      } else if(result[0].stateNo===2){
+        res.render('fail',{message:'대여중인 도서입니다.'});
       } else {
-        res.redirect('도서등록에 실패했습니다.');
+        let sql = `UPDATE book SET
+               			state_no = ?
+              		WHERE book_code = ?`;
+        conn.query(sql, [3, bookCode], function(err, result){
+          if(err){
+            console.log(err);
+            res.status(500).send('Internal Server Error');
+          } else {
+            res.redirect('/bookDisposal');
+          }
+        });
       }
     }
   });
 });
 
-//도서폐기
-app.get('/bookDisposal', function(req, res){
-  res.render('bookDisposal',{});
-});
 
 //도서대여
 app.get('/bookRent', function(req, res){
