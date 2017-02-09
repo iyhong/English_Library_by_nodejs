@@ -338,6 +338,7 @@ app.post('/bookRent', function(req, res){
                 res.status(500).send('Internal Server Error');
               } else {
                 console.log(result[0].num);
+                //가져온 결과를 5자리수로 포맷팅
                 rentalCode += leadingZeros(result[0].num,5);
                 console.log('rentalCode:'+rentalCode);
 
@@ -594,8 +595,6 @@ app.post('/getRental', function(req, res){
       }
     }
   });
-
-
 });
 
 
@@ -653,7 +652,6 @@ app.post('/libraryAdd', function(req,res){
         }
       });
     }
-
   });
 });
 
