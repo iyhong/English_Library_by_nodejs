@@ -163,6 +163,11 @@ app.post('/bookDisposal', function(req, res){
       } else if(result[0].stateNo===2){
         res.render('fail',{message:'대여중인 도서입니다.'});
       } else {
+
+        //트랙잭션 시작
+        conn.beginTransaction(function(err){
+          if(err){throw err;}
+
         let sql = `UPDATE book SET
                			state_no = ?
               		WHERE book_code = ?`;
@@ -195,9 +200,21 @@ app.post('/bookDisposal', function(req, res){
             console.log(err);
             res.status(500).send('Internal Server Error');
           } else {
+            //커밋
+            conn.commit(function(err) {
+              if (err) {
+                //롤백
+                conn.rollback(function() {
+                  throw err;
+                });
+              }
+            });
+
             res.redirect('/bookDisposal');
           }
         });
+      });
+      //트랜잭션 종료
       }
     }
   });
@@ -328,6 +345,7 @@ app.post('/bookRent', function(req, res){
                 let insertRentalSql = `INSERT INTO rental(
                                   			rental_code,
                                   			book_code,
+                                        book_code_clone,
                                   			rental_start,
                                   			rental_end,
                                   			member_id,
@@ -335,7 +353,7 @@ app.post('/bookRent', function(req, res){
                                   		) VALUES (
                                   			?,?,?,?,?,?
                                   		)`;
-                conn.query(insertRentalSql, [rentalCode, bookCode, rentalStart, rentalEnd, memberId, rentalPayment], function(err, result){
+                conn.query(insertRentalSql, [rentalCode, bookCode, bookCode, rentalStart, rentalEnd, memberId, rentalPayment], function(err, result){
                   if(err){
                     console.log(err);
                     res.status(500).send('Internal Server Error');
