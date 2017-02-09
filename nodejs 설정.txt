@@ -3,3 +3,4 @@ bodyparser
 node-mysql
 ejs
 express-session
+mysql
