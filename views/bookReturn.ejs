@@ -71,6 +71,7 @@ $( document ).ready(function() {
 	        data : { "bookCode" : $("#bookCode").val() },
 	        success : function(data){
 	            //var data = JSON.parse(responseData);
+
 	            if(!data){
 		            $("#bookName").val("");
 		            $("#memberName").val("");
@@ -81,7 +82,9 @@ $( document ).ready(function() {
 		            $("#bookTotalDay").val("");
 	                alert("해당도서의 대여정보가 없습니다.");
 	                return false;
-	            }
+	            } else if(data.row){
+								alert('대여불가 도서');
+							}
 	            $("#bookName").val(data.bookName);
 	            $("#memberName").val(data.memberName);
 	            $("#totalPrice").val(data.totalPrice);
