@@ -156,7 +156,9 @@ app.post('/bookDisposal', function(req, res){
       console.log(err);
       res.status(500).send('Internal Server Error');
     } else {
-      if(result[0].stateNo===3){
+      if(!result[0]){
+        res.render('fail',{message:'도서가 없습니다.'})
+      } else if(result[0].stateNo===3){
         res.render('fail',{message:'이미 폐기된 도서입니다.'});
       } else if(result[0].stateNo===2){
         res.render('fail',{message:'대여중인 도서입니다.'});
@@ -165,6 +167,30 @@ app.post('/bookDisposal', function(req, res){
                			state_no = ?
               		WHERE book_code = ?`;
         conn.query(sql, [3, bookCode], function(err, result){
+          if(err){
+            console.log(err);
+            res.status(500).send('Internal Server Error');
+          } else {
+            console.log('도서상태 폐기로 업데이트 성공')
+          }
+        });
+        let sqlInsert = `INSERT INTO disposal(
+                    			disposal.book_code,
+                    			disposal.disposal_bookname,
+                    			disposal.disposal_author,
+                    			disposal.genre_no,
+                    			disposal.disposal_publisher,
+                    			disposal.disposal_registerday
+                    		)SELECT
+                    			book.book_code,
+                    			book.book_name,
+                    			book.book_author,
+                    			book.genre_no,
+                    			book.book_publisher,
+                    			sysdate()
+                    		FROM book
+                    		WHERE book.book_code=?`;
+        conn.query(sqlInsert, [bookCode], function(err, result){
           if(err){
             console.log(err);
             res.status(500).send('Internal Server Error');
@@ -178,9 +204,189 @@ app.post('/bookDisposal', function(req, res){
 });
 
 
-//도서대여
+//도서대여 폼
 app.get('/bookRent', function(req, res){
   res.render('bookRent',{});
+});
+
+//도서대여 실행
+app.post('/bookRent', function(req, res){
+  let libraryId = req.session.libraryId;
+  let bookCode = req.body.bookCode;
+  let memberId = req.body.memberId;
+  let rentalStart = req.body.rentalStart;
+  let rentalEnd = req.body.rentalEnd;
+  let rentalPayment = req.body.rentalPayment;
+  console.log('------------------------');
+  console.log('bookCode:'+bookCode);
+  console.log('memberId:'+memberId);
+  console.log('rentalStart:'+rentalStart);
+  console.log('rentalEnd:'+rentalEnd);
+  console.log('rentalPayment:'+rentalPayment);
+  console.log('------------------------');
+  //rentalCode 만들기
+  if(!libraryId){
+    res.render('fail', {message:'로그인 하세요'});
+  }
+  let rentalCode = req.session.libraryId;
+  //rentalCode = rentalCode.toString();
+  function leadingZeros(n, digits) {
+    console.log('===leadingZeros 함수===')
+    var zero = '';
+    n = n.toString();
+    if (n.length < digits) {
+      for (var i = 0; i < digits - n.length; i++)
+        zero += '0';
+    }
+    console.log(zero+n);
+    console.log('===leadingZeros 함수===')
+    return zero + n;
+  }
+  //대여일 입력이없으면 오늘날짜 넣어줌
+  if(!rentalStart){
+    let dt = new Date();
+    rentalStart = dt.getFullYear()+'-';
+    rentalStart += dt.getMonth()+1+'-';
+    rentalStart += dt.getDate();
+  }
+  console.log('rentalStart:'+rentalStart);
+  //반납일 입력이없으면 null로 넣어줌
+  if(!rentalEnd){
+    rentalEnd = null;
+  }
+  console.log('rentalEnd:'+rentalEnd);
+
+  //트랙잭션 시작
+  conn.beginTransaction(function(err){
+    if(err){throw err;}
+
+    //도서상태 조회후 도서상태가 1이 아니면 fail로 보냄
+    let selectBookStateSql = `SELECT
+                           			state_no as stateNo
+                           		FROM book
+                           		WHERE book_code = ?`;
+    conn.query(selectBookStateSql,[bookCode], function(err, result){
+      if(err){
+        console.log(err);
+        res.status(500).send('Internal Server Error');
+      } else {
+        //console.log('도서상태값:'+result[0].stateNo);
+        if(!result[0]){
+          console.log('도서가없어요');
+          res.render('fail', {message:'없는도서입니다.'});
+          //res.redirect('/fail');
+        } else if (result[0].stateNo===2){
+          console.log('대여중인 도서입니다');
+          res.render('fail', {message:'대여중인 도서입니다'});
+        } else if (result[0].stateNo===3){
+          console.log('폐기된 도서입니다');
+          res.render('fail', {message:'폐기된 도서입니다'});
+        } else {
+
+        }
+      }
+    });
+
+    //회원아이디 검색해보기 없으면 fail로
+    let selectMemberSql = `SELECT
+                      			member_id as memberId
+                      		FROM member
+                      		WHERE member_id = ?`;
+    conn.query(selectMemberSql, [memberId], function(err, result){
+      if(err){
+        console.log(err);
+        res.status(500).send('Internal Server Error');
+      } else {
+        if(!result[0]){
+          res.render('fail',{message:'없는 회원입니다.'});
+        }
+      }
+    });
+
+    //autoincrement 가져오기
+    //db에서 autoincrement값 가져와서 formatting 하고 rentalCode에 합쳐준다.
+    let selectNoSql = `SELECT
+                  			max(auto_num) as num
+                  		FROM rental`;
+    conn.query(selectNoSql,function(err,result){
+      console.log('-----conn.query----');
+      if(err) {
+        console.log(err);
+        res.status(500).send('Internal Server Error');
+      } else {
+        console.log(result[0].num);
+        rentalCode += leadingZeros(result[0].num,5);
+        console.log('rentalCode:'+rentalCode);
+
+        //대여 등록
+        let insertRentalSql = `INSERT INTO rental(
+                          			rental_code,
+                          			book_code,
+                          			rental_start,
+                          			rental_end,
+                          			member_id,
+                          			rental_payment
+                          		) VALUES (
+                          			?,?,?,?,?,?
+                          		)`;
+        conn.query(insertRentalSql, [rentalCode, bookCode, rentalStart, rentalEnd, memberId, rentalPayment], function(err, result){
+          if(err){
+            console.log(err);
+            res.status(500).send('Internal Server Error');
+          } else {
+            console.log('대여등록 성공');
+          }
+        });
+
+        //도서상태 변경(대여가능->대여불가)
+        let updateBookStateSql = `UPDATE book SET
+                                    state_no = ?
+                                  WHERE book_code = ?`;
+        conn.query(updateBookStateSql,[2, bookCode], function(err, result){
+          if(err){
+            console.log(err);
+            res.status(500).send('Internal Server Error');
+          } else {
+            console.log('도서상태 UPDATE');
+          }
+        });
+
+        //firstday select
+        //도서의 firstday 가져온다(null인지 아닌지 확인하기위해서)
+        let selectBookFirstDaySql = `SELECT
+                                      book_firstday as bookFirstday
+                                    FROM book
+                                    WHERE book_code=?`;
+        conn.query(selectBookFirstDaySql, [bookCode], function(err, result){
+          if(err){
+            console.log(err);
+            res.status(500).send('Internal Server Error');
+          } else {
+            //도서의 firstday 가 null이면 오늘날짜를 update시켜준다.
+            if(!result[0].bookFirstday){
+              let updateBookFirstdaySql = `UPDATE book SET
+                                            book_firstday = sysdate()
+                                          WHERE book_code = ?`;
+              conn.query(updateBookFirstdaySql, [bookCode], function(err, result){
+                if(err){
+                  console.log(err);
+                  res.status(500).send('Internal Server Error');
+                } else {
+                  console.log('도서 firstday UPDATE');
+                  res.redirect('/bookRent');
+                }
+              });
+            } else {
+              //도서의 firstday 가 null이 아니면 끝
+              res.redirect('/bookRent');
+            }
+          }
+        });
+      }
+      console.log('-----conn.query----');
+    });
+  });
+  //트랜잭션 끝
 });
 
 //도서반납
@@ -193,10 +399,17 @@ app.get('/memberAdd', function(req, res){
   res.render('memberAdd',{});
 });
 
-app.get('/hi',function(req,res){
-  res.send('hello world');
+app.get('/fail',function(req,res){
+  res.redirect('fail1');
+  return;
+  console.log('tesetsetset');
 });
+app.get('/fail1',function(req,res){
 
+  //res.redirect('fail');
+  console.log('1111111111');
+  res.send('asdfasd');
+});
 
 app.listen(3000,function(){
   console.log('Connected, 3000 port!');
