@@ -104,9 +104,9 @@ a { /*사이드 글자 색상*/
 				<div>
 					<select name=memberLevelNo>
 						<option>::등급선택::</option>
-						<c:forEach var="l" items="${memberLevel}">
-							<option value="${l.memberLevelNo}">${l.memberLevelName}</option>
-						</c:forEach>
+						<% for (var i in level) { %>
+							<option value="<%= level[i].memberLevelNo %>"><%= level[i].memberLevelName %></option>
+						<% } %>
 					</select>
 				</div>
 					<p>
