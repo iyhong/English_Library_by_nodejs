@@ -65,7 +65,7 @@ a { /*사이드 글자 색상*/
 		<div class="collapse navbar-collapse" id="myNavbar">
 			<ul class="nav navbar-nav navbar-right">
 
-				<li><a href=""> <span
+				<li><a href="/"> <span
 						class="glyphicon glyphicon-log-in"></span> home
 				</a></li>
 			</ul>
@@ -101,10 +101,10 @@ a { /*사이드 글자 색상*/
 					<div>
 						지역 : <select name="local">
 							<option value="">::지역선택::</option>
-							<c:forEach var="l" items="${localList}">
-								<option value="${l.localNo}">${l.localName}</option>
-							</c:forEach>
-						</select>
+							  <% for(var i in result) { %>
+							    <option value="<%= result[i].localNo %>"><%= result[i].localName %></option>
+                <% } %>
+            </select>
 					</div>
 					<p>
 						<input type="submit" class="btn btn-success btn-large" value="등록" />
