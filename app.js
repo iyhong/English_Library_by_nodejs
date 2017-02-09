@@ -438,10 +438,84 @@ app.post('/bookRent', function(req, res){
   //도서상태조회 끝
 });
 
-//도서반납
+//도서반납 폼
 app.get('/bookReturn', function(req, res){
   res.render('bookReturn',{});
 });
+
+//도서반납 실행
+app.post('/bookReturn', function(req, res){
+  //let bookCode = req.body.
+});
+
+app.post('/getRental', function(req, res){
+  let bookCode = req.body.bookCode;
+  let sql = `SELECT
+        			rental_code as rentalCode,
+        			rental.book_code as bookCode,
+        			book.book_name as bookName,
+        			member.member_name as memberName,
+        			rental_payment as rentalPayment,
+        			rental_start as rentalStart,
+        			memberlevel.price as memberLevelPrice,
+        			book.book_totalday as bookTotalDay
+        		FROM rental
+        		JOIN book ON rental.book_code=book.book_code
+        		JOIN member ON rental.member_id=member.member_id
+        		JOIN memberlevel ON member.member_id=memberlevel.memberlevel_no
+        		WHERE rental.book_code=? and rentalstate_no !=2`;
+  conn.query(sql, [bookCode], function(err, result){
+    if(err){
+      console.log(err);
+      res.status(500).send('Internal Server Error');
+    } else {
+      console.log('쿼리 정상 실행');
+      let bookName = result[0].bookName;
+      let rentalCode = result[0].rentalCode;
+      let rentalPayment = result[0].rentalPayment;
+      let memberName = result[0].memberName;
+      let rentalStart = result[0].rentalStart;
+      let memberLevelPrice = result[0].memberLevelPrice;
+
+      // 날짜 차이 계산 함수
+      // date1 : 기준 날짜(YYYY-MM-DD), date2 : 대상 날짜(YYYY-MM-DD)
+      function getDateDiff(date1,date2) {
+        console.log('getDateDiff 함수실행')
+        var arrDate1 = date1.split("-");
+        var getDate1 = new Date(parseInt(arrDate1[0]),parseInt(arrDate1[1])-1,parseInt(arrDate1[2]));
+        console.log('getDate1 : '+getDate1);
+        console.log('date2 : '+date2);
+        var getDiffTime = getDate1.getTime() - date2.getTime();
+
+        return Math.floor(getDiffTime / (1000 * 60 * 60 * 24));
+      }
+
+      let dt = new Date();
+      let today = dt.getFullYear()+'-';
+      today += dt.getMonth()+1+'-';
+      today += dt.getDate();
+      console.log('today : '+today);
+      console.log('rentalStart : '+rentalStart);
+      let diffDay = getDateDiff(today,rentalStart)+1;
+      console.log('날짜차이 : '+diffDay);
+      //계산해야함.
+      let totalPrice = memberLevelPrice*diffDay;
+      let willPay = totalPrice - rentalPayment;
+      console.log('totalPrice : '+totalPrice);
+      console.log('willPay : '+willPay);
+      
+      res.send({bookName : bookName,
+                memberName : memberName,
+                totalPrice : totalPrice,
+                rentalPayment : rentalPayment,
+                willPay : willPay,
+                rentalCode : rentalCode,
+                bookTotalDay : diffDay
+      });
+    }
+  });
+});
+
 
 //회원등록
 app.get('/memberAdd', function(req, res){
