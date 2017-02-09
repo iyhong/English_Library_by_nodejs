@@ -1,0 +1,15 @@
+//트랙잭션 시작
+conn.beginTransaction(function(err){
+  if(err){throw err;}
+
+  });
+//트랜잭션끝
+
+
+conn.commit(function(err) {
+  if (err) {
+    conn.rollback(function() {
+      throw err;
+    });
+  }
+});

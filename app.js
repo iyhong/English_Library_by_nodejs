@@ -445,9 +445,59 @@ app.get('/bookReturn', function(req, res){
 
 //도서반납 실행
 app.post('/bookReturn', function(req, res){
-  //let bookCode = req.body.
+  let bookCode = req.body.bookCode;
+  let rentalCode = req.body.rentalCode;
+  let bookTotalDay = req.body.bookTotalDay;
+  let totalPrice = req.body.totalPrice;
+
+  conn.beginTransaction(function(err){
+    if(err){throw err;}
+    //반납 시작
+    let updateRentalStateSql = `UPDATE rental
+                            		SET
+                            			rentalstate_no=2,
+                            			rental_payment=?,
+                            			rental_end=sysdate()
+                            		WHERE rental_code=?`;
+    conn.query(updateRentalStateSql,[totalPrice, rentalCode], function(err, result){
+      if(err){
+        console.log(err);
+        res.status(500).send('Internal Server Error');
+      } else {
+        console.log('대여상태 수정');
+
+        console.log('bookTotalDay : '+bookTotalDay);
+        console.log('bookCode : '+bookCode);
+        //도서상태 수정(bookTotalDay, state_no)
+        let updateBookStateSql = `UPDATE book SET
+                                    book.state_no = 1,
+                                    book.book_totalday = ?
+                              		WHERE book.book_code = ?`;
+        conn.query(updateBookStateSql, [bookTotalDay, bookCode], function(err, result){
+          if(err){
+            console.log(err);
+            res.status(500).send('Internal Server Error');
+          } else {
+            console.log('도서상태 수정');
+            //커밋
+            conn.commit(function(err) {
+              if (err) {
+                //롤백
+                conn.rollback(function() {
+                  throw err;
+                });
+              }
+            });
+            res.redirect('/bookReturn');
+          }
+        });
+      }
+    });
+  });
+  //트랜잭션 종료
 });
 
+//ajax 요청받음
 app.post('/getRental', function(req, res){
   let bookCode = req.body.bookCode;
   let sql = `SELECT
@@ -476,6 +526,7 @@ app.post('/getRental', function(req, res){
       let memberName = result[0].memberName;
       let rentalStart = result[0].rentalStart;
       let memberLevelPrice = result[0].memberLevelPrice;
+      let bookTotalDay = result[0].bookTotalDay;
 
       // 날짜 차이 계산 함수
       // date1 : 기준 날짜(YYYY-MM-DD), date2 : 대상 날짜(YYYY-MM-DD)
@@ -484,12 +535,13 @@ app.post('/getRental', function(req, res){
         var arrDate1 = date1.split("-");
         var getDate1 = new Date(parseInt(arrDate1[0]),parseInt(arrDate1[1])-1,parseInt(arrDate1[2]));
         console.log('getDate1 : '+getDate1);
+        //date2는 db에서 가져오는데 이미 포맷이 되어잇기때문에 변환할필요가 없음
         console.log('date2 : '+date2);
         var getDiffTime = getDate1.getTime() - date2.getTime();
-
         return Math.floor(getDiffTime / (1000 * 60 * 60 * 24));
       }
 
+      //오늘날짜 만들기
       let dt = new Date();
       let today = dt.getFullYear()+'-';
       today += dt.getMonth()+1+'-';
@@ -498,19 +550,23 @@ app.post('/getRental', function(req, res){
       console.log('rentalStart : '+rentalStart);
       let diffDay = getDateDiff(today,rentalStart)+1;
       console.log('날짜차이 : '+diffDay);
-      //계산해야함.
+
+      bookTotalDay += diffDay;
+      console.log('bookTotalDay : '+bookTotalDay);
+
+      //계산 총 금액, 받을금액
       let totalPrice = memberLevelPrice*diffDay;
       let willPay = totalPrice - rentalPayment;
       console.log('totalPrice : '+totalPrice);
       console.log('willPay : '+willPay);
-      
+
       res.send({bookName : bookName,
                 memberName : memberName,
                 totalPrice : totalPrice,
                 rentalPayment : rentalPayment,
                 willPay : willPay,
                 rentalCode : rentalCode,
-                bookTotalDay : diffDay
+                bookTotalDay : bookTotalDay
       });
     }
   });
@@ -522,17 +578,18 @@ app.get('/memberAdd', function(req, res){
   res.render('memberAdd',{});
 });
 
-app.get('/fail',function(req,res){
-  res.redirect('fail1');
-  return;
-  console.log('tesetsetset');
-});
-app.get('/fail1',function(req,res){
-
-  //res.redirect('fail');
-  console.log('1111111111');
-  res.send('asdfasd');
-});
+// 테스트용
+// app.get('/fail',function(req,res){
+//   res.redirect('fail1');
+//   return;
+//   console.log('tesetsetset');
+// });
+// app.get('/fail1',function(req,res){
+//
+//   //res.redirect('fail');
+//   console.log('1111111111');
+//   res.send('asdfasd');
+// });
 
 app.listen(3000,function(){
   console.log('Connected, 3000 port!');
