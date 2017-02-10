@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
+var route = express.Router();
 var app = express();
 var ejs = require('ejs');
 var session = require('express-session');
@@ -31,51 +32,11 @@ conn.connect();
 app.get('/', function(req, res){
   res.render('login', {});
 });
-//로그인실행
-app.post('/login', function(req, res){
-  var libraryId = req.body.libraryId;
-  var libraryPw = req.body.libraryPw;
-  console.log('libraryId:'+libraryId);
-  console.log('libraryPw:'+libraryPw);
-  var sql = `SELECT library_id as libraryId
-            FROM library
-            WHERE library_id = ? AND library_pw = ?`;
-  conn.query(sql, [libraryId,libraryPw], function(err, result, fields){
-    console.log('result:'+result[0].libraryId);
-    if(err){
-      console.log(err);
-      res.status(500).send('Internal Server Error');
-    } else {
-      if(result[0].libraryId){
-        console.log('로그인성공');
-        req.session.libraryId=libraryId;
-        //res.send(req.session.id);
-        console.log('session:'+req.session.libraryId);
-        res.redirect('/main');
-      }
-    }
-  });
-});
 
-//로그아웃
-app.get('/logout', function(req, res){
-  console.log('session destroy before:'+req.session.libraryId);
-  //세션삭제
-  if(req.session.libraryId){
-    req.session.destroy(function(err){
-      if(err){
-        console.log(err);
-        res.status(500).send('Internal Server Error');
-      } else {
-        res.redirect('/');
-      }
-    });
-  } else {
-    res.redirect('/');
-  }
-  console.log('session destroy after:'+req.session);
-});
 
+//로그인 로그아웃
+var log = require('./routes/log')(route, conn);
+app.use('/log', log);
 
 //main요청
 app.get('/main', function(req, res){
