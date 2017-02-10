@@ -244,6 +244,7 @@ app.post('/bookRent', function(req, res){
   //rentalCode 만들기
   if(!libraryId){
     res.render('fail', {message:'로그인 하세요'});
+    return;
   }
   let rentalCode = req.session.libraryId;
   //rentalCode = rentalCode.toString();
@@ -304,6 +305,7 @@ app.post('/bookRent', function(req, res){
         res.render('fail', {message:'폐기된 도서입니다'});
         return;
       } else {
+        //도서상태가 대여가능인경우의 else문 내부
         //회원아이디 검색해보기 없으면 fail로
         let selectMemberSql = `SELECT
                                 member_id as memberId
@@ -363,10 +365,12 @@ app.post('/bookRent', function(req, res){
                     console.log('대여등록 성공');
                   }
                 });
+;
 
                 //도서상태 변경(대여가능->대여불가)
                 let updateBookStateSql = `UPDATE book SET
-                                            state_no = ?
+                                            state_no = ?,
+                                            book_totalcount = book_totalcount+1
                                           WHERE book_code = ?`;
                 conn.query(updateBookStateSql,[2, bookCode], function(err, result){
                   if(err){
@@ -376,6 +380,7 @@ app.post('/bookRent', function(req, res){
                     console.log('도서상태 UPDATE');
                   }
                 });
+
 
                 //firstday select
                 //도서의 firstday 가져온다(null인지 아닌지 확인하기위해서)
