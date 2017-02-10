@@ -1,8 +1,12 @@
-module.exports = function(route, conn){
+module.exports = function(conn){
+  var express = require('express');
+  var route = express.Router();
 
 
   //도서대여 폼
   route.get('/', function(req, res){
+    console.log('bookRent get요청');
+
     res.render('bookRent',{});
   });
 

@@ -94,3 +94,17 @@ module.exports = function(route, conn){
 
 return route;
 }
+
+//or
+module.exports = function(){
+var express = require('express');
+var route = express.Router();
+var mysql = require('mysql');
+var conn = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'root',
+  password : 'java0000',
+  database : 'library'
+});
+return route;
+}

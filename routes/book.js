@@ -1,5 +1,6 @@
-module.exports = function(route, conn){
-
+module.exports = function(conn){
+  var express = require('express');
+  var route = express.Router();
 
   //도서등록 폼
   route.get('/Add', function(req, res){

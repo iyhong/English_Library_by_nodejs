@@ -1,5 +1,6 @@
-module.exports = function(route, conn){
-
+module.exports = function(conn){
+  var express = require('express');
+  var route = express.Router();
 
   //로그인실행
   route.post('/in', function(req, res){
