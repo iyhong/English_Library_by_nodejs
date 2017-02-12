@@ -4,10 +4,10 @@ module.exports = function(conn){
 
   //도서등록 폼
   route.get('/Add', function(req, res){
-    var sql = `SELECT
-          			genre_no as genreNo,
-          			genre_name as genreName
-          		FROM genre`;
+    var sql = 'SELECT'+
+          			'genre_no as genreNo,'+
+          			'genre_name as genreName'+
+          		'FROM genre';
     conn.query(sql, function(err, genre, fields){
       if(err){
         console.log(err);
