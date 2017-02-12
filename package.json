@@ -1,12 +1,11 @@
 {
   "name": "nodejs",
   "version": "1.0.0",
-  "description": "",
   "scripts": {
-    "start" : "node app.js"
+    "start": "node app.js"
   },
   "engines": {
-  "node": "0.10.x"
+    "node": "0.10.x"
   },
   "author": "",
   "license": "ISC",
@@ -14,5 +13,8 @@
     "express": "^4.14.1",
     "express-session": "^1.15.0",
     "node-mysql": "^0.4.2"
-  }
+  },
+  "main": "app.js",
+  "devDependencies": {},
+  "description": ""
 }
