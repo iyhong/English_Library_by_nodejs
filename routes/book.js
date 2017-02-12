@@ -5,9 +5,9 @@ module.exports = function(conn){
   //도서등록 폼
   route.get('/Add', function(req, res){
     var sql = 'SELECT'+
-          			'genre_no as genreNo,'+
-          			'genre_name as genreName'+
-          		'FROM genre';
+          			' genre_no as genreNo,'+
+          			' genre_name as genreName'+
+          		' FROM genre';
     conn.query(sql, function(err, genre, fields){
       if(err){
         console.log(err);
@@ -31,11 +31,11 @@ module.exports = function(conn){
     var libraryId = req.session.libraryId;
     console.log('libraryId:'+libraryId);
     var sql = 'INSERT INTO book('+
-           			'library_id,'+
-           			'genre_no,'+
-           			'book_name,'+
-           			'book_author,'+
-           			'book_publisher'+
+           			' library_id,'+
+           			' genre_no,'+
+           			' book_name,'+
+           			' book_author,'+
+           			' book_publisher'+
            	  ') values ('+
            		'	?,?,?,?,?)';
     if(!libraryId){
@@ -66,9 +66,9 @@ module.exports = function(conn){
   route.post('/Disposal', function(req, res){
     var bookCode = req.body.bookCode;
     var sql = 'SELECT'+
-          			'state_no as stateNo'+
-           		'FROM book'+
-           		'WHERE book_code=?';
+          			' state_no as stateNo'+
+           		' FROM book'+
+           		' WHERE book_code=?';
     conn.query(sql, [bookCode], function(err, result){
       if(err){
         console.log(err);
@@ -87,8 +87,8 @@ module.exports = function(conn){
             if(err){throw err;}
 
           var sql = 'UPDATE book SET'+
-                 			'state_no = ?'+
-                		'WHERE book_code = ?';
+                 			' state_no = ?'+
+                		' WHERE book_code = ?';
           conn.query(sql, [3, bookCode], function(err, result){
             if(err){
               console.log(err);
@@ -98,21 +98,21 @@ module.exports = function(conn){
             }
           });
           var sqlInsert = 'INSERT INTO disposal('+
-                      			'disposal.book_code,'+
-                      			'disposal.disposal_bookname,'+
-                      			'disposal.disposal_author,'+
-                      			'disposal.genre_no,'+
-                      			'disposal.disposal_publisher,'+
-                      			'disposal.disposal_registerday'+
+                      			' disposal.book_code,'+
+                      			' disposal.disposal_bookname,'+
+                      			' disposal.disposal_author,'+
+                      			' disposal.genre_no,'+
+                      			' disposal.disposal_publisher,'+
+                      			' disposal.disposal_registerday'+
                       		')SELECT '+
-                      			'book.book_code,'+
-                      			'book.book_name,'+
-                      			'book.book_author,'+
-                      			'book.genre_no,'+
-                      			'book.book_publisher,'+
-                      			'sysdate()'+
-                      		'FROM book'+
-                      		'WHERE book.book_code=?';
+                      			' book.book_code,'+
+                      			' book.book_name,'+
+                      			' book.book_author,'+
+                      			' book.genre_no,'+
+                      			' book.book_publisher,'+
+                      			' sysdate()'+
+                      		' FROM book'+
+                      		' WHERE book.book_code=?';
           conn.query(sqlInsert, [bookCode], function(err, result){
             if(err){
               console.log(err);

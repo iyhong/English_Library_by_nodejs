@@ -5,10 +5,10 @@ module.exports = function(conn){
   //회원등록 폼
   route.get('/', function(req, res){
     var selectMemberLevelSql = 'SELECT'+
-                            			'memberlevel_no as memberLevelNo,'+
-                            			'memberlevel_name as memberLevelName,'+
-                            			'price'+
-                            		'FROM memberlevel';
+                            			' memberlevel_no as memberLevelNo,'+
+                            			' memberlevel_name as memberLevelName,'+
+                            			' price'+
+                            		' FROM memberlevel';
     conn.query(selectMemberLevelSql, function(err, result){
       if(err){
         console.log(err);
@@ -26,9 +26,9 @@ module.exports = function(conn){
     var memberLevelNo = req.body.memberLevelNo;
 
     var insertMember = 'INSERT INTO member('+
-                    			'member_name,'+
-                    			'member_phone,'+
-                    			'memberlevel_no'+
+                    			' member_name,'+
+                    			' member_phone,'+
+                    			' memberlevel_no'+
                     		') VALUES ('+
                     			'?,?,?)';
     conn.query(insertMember, [memberName, memberPhone, memberLevelNo], function(err, result){

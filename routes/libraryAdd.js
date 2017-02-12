@@ -5,9 +5,9 @@ module.exports = function(conn){
   //도서관등록 폼
   route.get('/', function(req, res){
     var selectLocalSql = 'SELECT'+
-                      			'local_no as localNo,'+
-                      			'local_name as localName'+
-                      		'FROM local';
+                      			' local_no as localNo,'+
+                      			' local_name as localName'+
+                      		' FROM local';
     conn.query(selectLocalSql, function(err, result){
       if(err){
         console.log(err);
@@ -25,9 +25,9 @@ module.exports = function(conn){
     var local = req.body.local;
 
     var selectLibrarySql ='SELECT'+
-                       			'library_id as libraryId'+
-                      		'FROM library'+
-                          'WHERE library_id = ?';
+                       			' library_id as libraryId'+
+                      		' FROM library'+
+                          ' WHERE library_id = ?';
     conn.query(selectLibrarySql, [libraryId], function(err, result){
       if(err){
         console.log(err);
@@ -40,9 +40,9 @@ module.exports = function(conn){
         }
         //도서관등록
         var insertLibrarySql = 'INSERT INTO library('+
-                             			'library_id,'+
-                             			'library_pw,'+
-                             			'local_no'+
+                             			' library_id,'+
+                             			' library_pw,'+
+                             			' local_no'+
                              		')values('+
                              			'?,?,?)';
         conn.query(insertLibrarySql, [libraryId, libraryPw, local], function(err,result){

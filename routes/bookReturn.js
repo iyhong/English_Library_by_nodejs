@@ -21,11 +21,11 @@ module.exports = function(conn){
       if(err){throw err;}
       //반납 시작
       var updateRentalStateSql = 'UPDATE rental'+
-                              		'SET'+
-                              			'rentalstate_no=2,'+
-                              			'rental_payment=?,'+
-                              			'rental_end=sysdate()'+
-                              		'WHERE rental_code=?';
+                              		' SET'+
+                              			' rentalstate_no=2,'+
+                              			' rental_payment=?,'+
+                              			' rental_end=sysdate()'+
+                              		' WHERE rental_code=?';
       conn.query(updateRentalStateSql,[totalPrice, rentalCode], function(err, result){
         if(err){
           console.log(err);
@@ -37,9 +37,9 @@ module.exports = function(conn){
           console.log('bookCode : '+bookCode);
           //도서상태 수정(bookTotalDay, state_no)
           var updateBookStateSql = 'UPDATE book SET'+
-                                      'book.state_no = 1,'+
-                                      'book.book_totalday = ?'+
-                                		'WHERE book.book_code = ?';
+                                      ' book.state_no = 1,'+
+                                      ' book.book_totalday = ?'+
+                                		' WHERE book.book_code = ?';
           conn.query(updateBookStateSql, [bookTotalDay, bookCode], function(err, result){
             if(err){
               console.log(err);

@@ -22,9 +22,9 @@ module.exports = function(conn){
     var bookCode = req.body.bookCode;
 
     var selectBookStateSql = 'SELECT'+
-                        			 'state_no as stateNo'+
-                           		'FROM book'+
-                           		'WHERE book_code=?';
+                        			 ' state_no as stateNo'+
+                           		' FROM book'+
+                           		' WHERE book_code=?';
     conn.query(selectBookStateSql, [bookCode], function(err, result){
       if(err){
         console.log(err);
@@ -39,19 +39,19 @@ module.exports = function(conn){
         } else {
           //도서코드로 대여정보 가져옴
           var sql = 'SELECT'+
-                			'rental_code as rentalCode,'+
-                			'rental.book_code as bookCode,'+
-                			'book.book_name as bookName,'+
-                			'member.member_name as memberName,'+
-                			'rental_payment as rentalPayment,'+
-                			'rental_start as rentalStart,'+
-                			'memberlevel.price as memberLevelPrice,'+
-                			'book.book_totalday as bookTotalDay'+
-                		'FROM rental'+
-                		'JOIN book ON rental.book_code=book.book_code'+
-                		'JOIN member ON rental.member_id=member.member_id'+
-                		'JOIN memberlevel ON member.member_id=memberlevel.memberlevel_no'+
-                		'WHERE rental.book_code=? and rentalstate_no !=2';
+                			' rental_code as rentalCode,'+
+                			' rental.book_code as bookCode,'+
+                			' book.book_name as bookName,'+
+                			' member.member_name as memberName,'+
+                			' rental_payment as rentalPayment,'+
+                			' rental_start as rentalStart,'+
+                			' memberlevel.price as memberLevelPrice,'+
+                			' book.book_totalday as bookTotalDay'+
+                		' FROM rental'+
+                		' JOIN book ON rental.book_code=book.book_code'+
+                		' JOIN member ON rental.member_id=member.member_id'+
+                		' JOIN memberlevel ON member.member_id=memberlevel.memberlevel_no'+
+                		' WHERE rental.book_code=? and rentalstate_no !=2';
           conn.query(sql, [bookCode], function(err, result){
             if(err){
               console.log(err);
@@ -65,7 +65,7 @@ module.exports = function(conn){
               var rentalStart = result[0].rentalStart;
               var memberLevelPrice = result[0].memberLevelPrice;
               var bookTotalDay = result[0].bookTotalDay;
-
+              console.log('bookName : '+bookName);
               // 날짜 차이 계산 함수
               // date1 : 기준 날짜(YYYY-MM-DD), date2 : 대상 날짜(YYYY-MM-DD)
 
