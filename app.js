@@ -15,12 +15,12 @@ app.use(session({
 }));
 
 // db Connection
-// var conn = mysql.createConnection({
-//   host     : 'localhost',
-//   user     : 'root',
-//   password : 'java0000',
-//   database : 'library'
-// });
+var conn = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'root',
+  password : 'java0000',
+  database : 'library'
+});
 //bodyParser 사용설정
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -45,36 +45,36 @@ app.get('/main', function(req, res){
 
 // route시작
 
-// //로그인 & 로그아웃
-// var log = require('./routes/log')(conn);
-// app.use('/log', log);
-//
-//
-// //도서등록 & 도서폐기
-// var book = require('./routes/book')(conn);
-// app.use('/book', book);
-//
-//
-// // 도서대여
-// var bookRent = require('./routes/bookRent')(conn);
-// app.use('/bookRent', bookRent);
-//
-//
-// // 도서반납
-// var bookReturn = require('./routes/bookReturn')(conn);
-// app.use('/bookReturn', bookReturn);
-//
-// // ajax요청
-// var getRental = require('./routes/getRental')(conn);
-// app.use('/getRental', getRental);
-//
-// // 도서관등록
-// var libraryAdd = require('./routes/libraryAdd')(conn);
-// app.use('/libraryAdd', libraryAdd);
-//
-// // 도서관등록
-// var memberAdd = require('./routes/memberAdd')(conn);
-// app.use('/memberAdd', memberAdd);
+//로그인 & 로그아웃
+var log = require('./routes/log')(conn);
+app.use('/log', log);
+
+
+//도서등록 & 도서폐기
+var book = require('./routes/book')(conn);
+app.use('/book', book);
+
+
+// 도서대여
+var bookRent = require('./routes/bookRent')(conn);
+app.use('/bookRent', bookRent);
+
+
+// 도서반납
+var bookReturn = require('./routes/bookReturn')(conn);
+app.use('/bookReturn', bookReturn);
+
+// ajax요청
+var getRental = require('./routes/getRental')(conn);
+app.use('/getRental', getRental);
+
+// 도서관등록
+var libraryAdd = require('./routes/libraryAdd')(conn);
+app.use('/libraryAdd', libraryAdd);
+
+// 도서관등록
+var memberAdd = require('./routes/memberAdd')(conn);
+app.use('/memberAdd', memberAdd);
 
 
 http.createServer(app).listen(port, function(){
