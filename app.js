@@ -95,7 +95,7 @@ var app = express();
 
 app.use(bodyParser());
 var router = express.Router();
-app.use(express.static('public'));
+//app.use(express.static('public'));
 app.use(router);
 
 var port = process.env.PORT || 3000;
