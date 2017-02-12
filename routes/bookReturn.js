@@ -11,21 +11,21 @@ module.exports = function(conn){
 
   //도서반납 실행
   route.post('/', function(req, res){
-    let bookCode = req.body.bookCode;
-    let rentalCode = req.body.rentalCode;
-    let bookTotalDay = req.body.bookTotalDay;
-    let totalPrice = req.body.totalPrice;
+    var bookCode = req.body.bookCode;
+    var rentalCode = req.body.rentalCode;
+    var bookTotalDay = req.body.bookTotalDay;
+    var totalPrice = req.body.totalPrice;
 
 
     conn.beginTransaction(function(err){
       if(err){throw err;}
       //반납 시작
-      let updateRentalStateSql = `UPDATE rental
-                              		SET
-                              			rentalstate_no=2,
-                              			rental_payment=?,
-                              			rental_end=sysdate()
-                              		WHERE rental_code=?`;
+      var updateRentalStateSql = 'UPDATE rental'+
+                              		'SET'+
+                              			'rentalstate_no=2,'+
+                              			'rental_payment=?,'+
+                              			'rental_end=sysdate()'+
+                              		'WHERE rental_code=?';
       conn.query(updateRentalStateSql,[totalPrice, rentalCode], function(err, result){
         if(err){
           console.log(err);
@@ -36,10 +36,10 @@ module.exports = function(conn){
           console.log('bookTotalDay : '+bookTotalDay);
           console.log('bookCode : '+bookCode);
           //도서상태 수정(bookTotalDay, state_no)
-          let updateBookStateSql = `UPDATE book SET
-                                      book.state_no = 1,
-                                      book.book_totalday = ?
-                                		WHERE book.book_code = ?`;
+          var updateBookStateSql = 'UPDATE book SET'+
+                                      'book.state_no = 1,'+
+                                      'book.book_totalday = ?'+
+                                		'WHERE book.book_code = ?';
           conn.query(updateBookStateSql, [bookTotalDay, bookCode], function(err, result){
             if(err){
               console.log(err);
@@ -64,4 +64,4 @@ module.exports = function(conn){
     //트랜잭션 종료
   });
 return route;
-}
+};

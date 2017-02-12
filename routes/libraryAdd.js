@@ -4,10 +4,10 @@ module.exports = function(conn){
 
   //도서관등록 폼
   route.get('/', function(req, res){
-    let selectLocalSql = `SELECT
-                      			local_no as localNo,
-                      			local_name as localName
-                      		FROM local`;
+    var selectLocalSql = 'SELECT'+
+                      			'local_no as localNo,'+
+                      			'local_name as localName'+
+                      		'FROM local';
     conn.query(selectLocalSql, function(err, result){
       if(err){
         console.log(err);
@@ -15,19 +15,19 @@ module.exports = function(conn){
       } else {
         res.render('libraryAdd',{result:result});
       }
-    })
+    });
   });
 
   //도서관등록 실행
   route.post('/', function(req,res){
-    let libraryId = req.body.libraryId;
-    let libraryPw = req.body.libraryPw;
-    let local = req.body.local;
+    var libraryId = req.body.libraryId;
+    var libraryPw = req.body.libraryPw;
+    var local = req.body.local;
 
-    let selectLibrarySql =`SELECT
-                       			library_id as libraryId
-                      		FROM library
-                          WHERE library_id = ?`;
+    var selectLibrarySql ='SELECT'+
+                       			'library_id as libraryId'+
+                      		'FROM library'+
+                          'WHERE library_id = ?';
     conn.query(selectLibrarySql, [libraryId], function(err, result){
       if(err){
         console.log(err);
@@ -39,13 +39,12 @@ module.exports = function(conn){
           return;
         }
         //도서관등록
-        let insertLibrarySql = `INSERT INTO library(
-                             			library_id,
-                             			library_pw,
-                             			local_no
-                             		)values(
-                             			?,?,?
-                             		)`;
+        var insertLibrarySql = 'INSERT INTO library('+
+                             			'library_id,'+
+                             			'library_pw,'+
+                             			'local_no'+
+                             		')values('+
+                             			'?,?,?)';
         conn.query(insertLibrarySql, [libraryId, libraryPw, local], function(err,result){
           if(err){
             console.log(err);
@@ -60,4 +59,4 @@ module.exports = function(conn){
   });
 
   return route;
-}
+};

@@ -30,15 +30,14 @@ module.exports = function(conn){
     console.log('genre:'+genre);
     var libraryId = req.session.libraryId;
     console.log('libraryId:'+libraryId);
-    var sql = `INSERT INTO book(
-           			library_id,
-           			genre_no,
-           			book_name,
-           			book_author,
-           			book_publisher
-           		) values (
-           			?,?,?,?,?
-           		)`;
+    var sql = 'INSERT INTO book('+
+           			'library_id,'+
+           			'genre_no,'+
+           			'book_name,'+
+           			'book_author,'+
+           			'book_publisher'+
+           	  ') values ('+
+           		'	?,?,?,?,?)';
     if(!libraryId){
       res.render('fail',{message:'로그인이 안되어있습니다.'});
     } else {
@@ -66,17 +65,17 @@ module.exports = function(conn){
   //도서폐기 실행
   route.post('/Disposal', function(req, res){
     var bookCode = req.body.bookCode;
-    var sql = `SELECT
-          			state_no as stateNo
-           		FROM book
-           		WHERE book_code=?`;
+    var sql = 'SELECT'+
+          			'state_no as stateNo'+
+           		'FROM book'+
+           		'WHERE book_code=?';
     conn.query(sql, [bookCode], function(err, result){
       if(err){
         console.log(err);
         res.status(500).send('Internal Server Error');
       } else {
         if(!result[0]){
-          res.render('fail',{message:'도서가 없습니다.'})
+          res.render('fail',{message:'도서가 없습니다.'});
         } else if(result[0].stateNo===3){
           res.render('fail',{message:'이미 폐기된 도서입니다.'});
         } else if(result[0].stateNo===2){
@@ -87,33 +86,33 @@ module.exports = function(conn){
           conn.beginTransaction(function(err){
             if(err){throw err;}
 
-          let sql = `UPDATE book SET
-                 			state_no = ?
-                		WHERE book_code = ?`;
+          var sql = 'UPDATE book SET'+
+                 			'state_no = ?'+
+                		'WHERE book_code = ?';
           conn.query(sql, [3, bookCode], function(err, result){
             if(err){
               console.log(err);
               res.status(500).send('Internal Server Error');
             } else {
-              console.log('도서상태 폐기로 업데이트 성공')
+              console.log('도서상태 폐기로 업데이트 성공');
             }
           });
-          let sqlInsert = `INSERT INTO disposal(
-                      			disposal.book_code,
-                      			disposal.disposal_bookname,
-                      			disposal.disposal_author,
-                      			disposal.genre_no,
-                      			disposal.disposal_publisher,
-                      			disposal.disposal_registerday
-                      		)SELECT
-                      			book.book_code,
-                      			book.book_name,
-                      			book.book_author,
-                      			book.genre_no,
-                      			book.book_publisher,
-                      			sysdate()
-                      		FROM book
-                      		WHERE book.book_code=?`;
+          var sqlInsert = 'INSERT INTO disposal('+
+                      			'disposal.book_code,'+
+                      			'disposal.disposal_bookname,'+
+                      			'disposal.disposal_author,'+
+                      			'disposal.genre_no,'+
+                      			'disposal.disposal_publisher,'+
+                      			'disposal.disposal_registerday'+
+                      		')SELECT '+
+                      			'book.book_code,'+
+                      			'book.book_name,'+
+                      			'book.book_author,'+
+                      			'book.genre_no,'+
+                      			'book.book_publisher,'+
+                      			'sysdate()'+
+                      		'FROM book'+
+                      		'WHERE book.book_code=?';
           conn.query(sqlInsert, [bookCode], function(err, result){
             if(err){
               console.log(err);
@@ -139,4 +138,4 @@ module.exports = function(conn){
   });
 
   return route;
-}
+};

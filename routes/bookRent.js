@@ -12,12 +12,12 @@ module.exports = function(conn){
 
   //도서대여 실행
   route.post('/', function(req, res){
-    let libraryId = req.session.libraryId;
-    let bookCode = req.body.bookCode;
-    let memberId = req.body.memberId;
-    let rentalStart = req.body.rentalStart;
-    let rentalEnd = req.body.rentalEnd;
-    let rentalPayment = req.body.rentalPayment;
+    var libraryId = req.session.libraryId;
+    var bookCode = req.body.bookCode;
+    var memberId = req.body.memberId;
+    var rentalStart = req.body.rentalStart;
+    var rentalEnd = req.body.rentalEnd;
+    var rentalPayment = req.body.rentalPayment;
     console.log('------------------------');
     console.log('bookCode:'+bookCode);
     console.log('memberId:'+memberId);
@@ -30,10 +30,10 @@ module.exports = function(conn){
       res.render('fail', {message:'로그인 하세요'});
       return;
     }
-    let rentalCode = req.session.libraryId;
+    var rentalCode = req.session.libraryId;
     //rentalCode = rentalCode.toString();
     function leadingZeros(n, digits) {
-      console.log('===leadingZeros 함수===')
+      console.log('===leadingZeros 함수===');
       var zero = '';
       n = n.toString();
       if (n.length < digits) {
@@ -41,12 +41,12 @@ module.exports = function(conn){
           zero += '0';
       }
       console.log(zero+n);
-      console.log('===leadingZeros 함수===')
+      console.log('===leadingZeros 함수===');
       return zero + n;
     }
     //대여일 입력이없으면 오늘날짜 넣어줌
     if(!rentalStart){
-      let dt = new Date();
+      var dt = new Date();
       rentalStart = dt.getFullYear()+'-';
       rentalStart += dt.getMonth()+1+'-';
       rentalStart += dt.getDate();
@@ -61,10 +61,10 @@ module.exports = function(conn){
 
 
     //도서상태 조회후 도서상태가 1이 아니면 fail로 보냄
-    let selectBookStateSql = `SELECT
-                           			state_no as stateNo
-                           		FROM book
-                           		WHERE book_code = ?`;
+    var selectBookStateSql = 'SELECT'+
+                           			'state_no as stateNo'+
+                           		'FROM book'+
+                           		'WHERE book_code = ?';
     conn.query(selectBookStateSql,[bookCode], function(err, result){
       if(err){
         console.log(err);
@@ -91,10 +91,10 @@ module.exports = function(conn){
         } else {
           //도서상태가 대여가능인경우의 else문 내부
           //회원아이디 검색해보기 없으면 fail로
-          let selectMemberSql = `SELECT
-                                  member_id as memberId
-                                FROM member
-                                WHERE member_id = ?`;
+          var selectMemberSql = 'SELECT'+
+                                  'member_id as memberId'+
+                                'FROM member'+
+                                'WHERE member_id = ?';
           conn.query(selectMemberSql, [memberId], function(err, result){
             if(err){
               console.log(err);
@@ -115,9 +115,9 @@ module.exports = function(conn){
               //db에서 autoincrement값 가져와서 formatting 하고 rentalCode에 합쳐준다.
               console.log('-----대여 프로세스 시작----');
 
-              let selectNoSql = `SELECT
-                            			max(auto_num) as num
-                            		FROM rental`;
+              var selectNoSql = 'SELECT'+
+                            			'max(auto_num) as num'+
+                            		'FROM rental';
               conn.query(selectNoSql,function(err,result){
                 if(err) {
                   console.log(err);
@@ -129,17 +129,16 @@ module.exports = function(conn){
                   console.log('rentalCode:'+rentalCode);
 
                   //대여 등록
-                  let insertRentalSql = `INSERT INTO rental(
-                                    			rental_code,
-                                    			book_code,
-                                          book_code_clone,
-                                    			rental_start,
-                                    			rental_end,
-                                    			member_id,
-                                    			rental_payment
-                                    		) VALUES (
-                                    			?,?,?,?,?,?,?
-                                    		)`;
+                  var insertRentalSql = 'INSERT INTO rental('+
+                                    			'rental_code,'+
+                                    			'book_code,'+
+                                          'book_code_clone,'+
+                                    			'rental_start,'+
+                                    			'rental_end,'+
+                                    			'member_id,'+
+                                    			'rental_payment'+
+                                    		') VALUES ('+
+                                    			'?,?,?,?,?,?,?)';
                   conn.query(insertRentalSql, [rentalCode, bookCode, bookCode, rentalStart, rentalEnd, memberId, rentalPayment], function(err, result){
                     if(err){
                       console.log(err);
@@ -152,10 +151,10 @@ module.exports = function(conn){
 
 
                   //도서상태 변경(대여가능->대여불가)
-                  let updateBookStateSql = `UPDATE book SET
-                                              state_no = ?,
-                                              book_totalcount = book_totalcount+1
-                                            WHERE book_code = ?`;
+                  var updateBookStateSql = 'UPDATE book SET'+
+                                              'state_no = ?,'+
+                                              'book_totalcount ='+ 'book_totalcount+1'+
+                                            'WHERE book_code = ?';
                   conn.query(updateBookStateSql,[2, bookCode], function(err, result){
                     if(err){
                       console.log(err);
@@ -168,10 +167,10 @@ module.exports = function(conn){
 
                   //firstday select
                   //도서의 firstday 가져온다(null인지 아닌지 확인하기위해서)
-                  let selectBookFirstDaySql = `SELECT
-                                                book_firstday as bookFirstday
-                                              FROM book
-                                              WHERE book_code=?`;
+                  var selectBookFirstDaySql = 'SELECT'+
+                                                'book_firstday as bookFirstday'+
+                                              'FROM book'+
+                                              'WHERE book_code=?';
                   conn.query(selectBookFirstDaySql, [bookCode], function(err, result){
                     if(err){
                       console.log(err);
@@ -179,9 +178,9 @@ module.exports = function(conn){
                     } else {
                       //도서의 firstday 가 null이면 오늘날짜를 update시켜준다.
                       if(!result[0].bookFirstday){
-                        let updateBookFirstdaySql = `UPDATE book SET
-                                                      book_firstday = sysdate()
-                                                    WHERE book_code = ?`;
+                        var updateBookFirstdaySql = 'UPDATE book SET'+
+                                                      'book_firstday = sysdate()'+
+                                                    'WHERE book_code = ?';
                         conn.query(updateBookFirstdaySql, [bookCode], function(err, result){
                           if(err){
                             console.log(err);
@@ -231,4 +230,4 @@ module.exports = function(conn){
 
 
 return route;
-}
+};

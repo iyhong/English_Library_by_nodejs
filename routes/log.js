@@ -8,9 +8,9 @@ module.exports = function(conn){
     var libraryPw = req.body.libraryPw;
     console.log('libraryId:'+libraryId);
     console.log('libraryPw:'+libraryPw);
-    var sql = `SELECT library_id as libraryId
-              FROM library
-              WHERE library_id = ? AND library_pw = ?`;
+    var sql = 'SELECT library_id as libraryId'+
+              'FROM library'+
+              'WHERE library_id = ? AND library_pw = ?';
     conn.query(sql, [libraryId,libraryPw], function(err, result, fields){
       console.log('result:'+result[0].libraryId);
       if(err){
@@ -52,4 +52,4 @@ module.exports = function(conn){
 
 
 
-}
+};
