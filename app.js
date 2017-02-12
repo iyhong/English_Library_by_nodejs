@@ -1,3 +1,4 @@
+var http = require('http');
 var express = require('express');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
@@ -5,6 +6,7 @@ var route = express.Router();
 var app = express();
 var ejs = require('ejs');
 var session = require('express-session');
+var port = process.env.PORT || 3000;
 
 app.use(session({
   secret: '@#@$MYSIGN#@$#$',  // 쿠키에 저장할 connect.sid값을 암호화할 키값 입력
@@ -75,7 +77,9 @@ var memberAdd = require('./routes/memberAdd')(conn);
 app.use('/memberAdd', memberAdd);
 
 
-
-app.listen(3000,function(){
-  console.log('Connected, 3000 port!');
+http.createServer(app).listen(port, function(){
+  console.log('server run');
 });
+// app.listen(3000,function(){
+//   console.log('Connected, 3000 port!');
+// });
