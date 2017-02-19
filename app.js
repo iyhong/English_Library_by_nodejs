@@ -17,10 +17,10 @@ app.use(session({
 
 // db Connection
 var conn = mysql.createConnection({
-  host     : 'loverman85.cafe24.com',
-  user     : 'loverman85',
-  password : 'alskdj12!',
-  database : 'loverman85'
+  host     : 'localhost',
+  user     : 'root',
+  password : 'java0000',
+  database : 'library'
 });
 //bodyParser 사용설정
 app.use(bodyParser.urlencoded({ extended: false }));

@@ -83,9 +83,10 @@ $( document ).ready(function() {
 	                alert("해당도서의 대여정보가 없습니다.");
 	                return false;
 	            } else if(data.row){
-								alert('대여불가 도서');
+								alert('대여중이아닙니다.');
 							}
-	            $("#bookName").val(data.bookName);
+							console.log(data.bookName);
+							$("#bookName").val(data.bookName);
 	            $("#memberName").val(data.memberName);
 	            $("#totalPrice").val(data.totalPrice);
 	            $("#rentalPayment").val(data.rentalPayment);
