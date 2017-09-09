@@ -3,3 +3,5 @@
 영어도서관
 
 spring으로 개발한 도서관을 node.js로 migration
+
+node.js / mysql / route / ejs
